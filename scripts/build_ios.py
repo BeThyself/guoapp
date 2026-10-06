@@ -81,7 +81,10 @@ def main():
     flutter = shutil.which('flutter')
     if not flutter or not shutil.which('pod'):
         raise SystemExit('请安装 Flutter 和 CocoaPods。')
-    run([flutter, 'pub', 'get', '--enforce-lockfile'])
+    # 与 build_android.py 一致：不用 --enforce-lockfile。
+    # 仓库的 pubspec.lock 缺 video_player 等条目（pubspec.yaml 后来加了依赖但没重新生成锁文件），
+    # --enforce-lockfile 会让构建直接失败——这正是当初 iOS/Windows job 被 if: false 关掉的原因。
+    run([flutter, 'pub', 'get'])
     run(['pod', 'install'], cwd=root / 'ios')
     output = root / 'dist' / 'ios'
     output.mkdir(parents=True, exist_ok=True)
