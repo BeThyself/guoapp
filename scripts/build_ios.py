@@ -119,7 +119,9 @@ def main():
         ipa = output / f'{variant.slug}-{version}-ios-unsigned.ipa'
         if ipa.exists():
             ipa.unlink()
-        run(['ditto', '-c', '-k', '--sequesterRsrc', str(payload), str(ipa)])
+        # ditto 不加 --keepParent 时只归档目录内容，会把 Payload/ 这一层丢掉，
+        # 结果是 zip 根下直接是 Runner.app/，不是合法 IPA（且与上面的 -app.zip 字节相同）。
+        run(['ditto', '-c', '-k', '--sequesterRsrc', '--keepParent', str(payload), str(ipa)])
         shutil.rmtree(payload)
         artifacts.append(ipa)
     if not artifacts:
